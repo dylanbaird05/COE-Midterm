@@ -1,0 +1,101 @@
+#include <iostream>
+#include <vector>
+#include <algorithm> 
+#include <random>    
+#include <ctime>     
+
+class Card {
+private:
+    std::string suit;
+    std::string label;
+    int value;
+    int alternateValue;
+    int sortValue;
+
+public:
+    Card(std::string suit, std::string label, int value, int alternateValue, int sortValue) :
+        suit(suit), label(label), value(value), alternateValue(alternateValue), sortValue(sortValue) {}
+
+    void displayCard() {
+        std::cout << "Suit: " << suit << std::endl;
+        std::cout << "Label: " << label << std::endl;
+        std::cout << "Value: " << value << std::endl;
+        std::cout << "Alternate Value: " << alternateValue << std::endl;
+        std::cout << "Sort Value: " << sortValue << std::endl;
+    }
+};
+
+class Deck {
+private:
+    std::vector<Card> cards;
+
+public:
+    void addCard(Card new_card) {
+        cards.push_back(new_card);
+    }
+
+    Card dealCard() {
+        Card dealt_card = cards.back();
+        cards.pop_back();
+        return dealt_card;
+    }
+
+    Deck splitDeck() {
+        Deck split;
+        int half_size = cards.size() / 2;
+        for (int i = 0; i < half_size; ++i) {
+            split.addCard(cards.back());
+            cards.pop_back();
+        }
+        return split;
+    }
+
+    void shuffleDeck(int number) {
+        std::default_random_engine rng(std::time(nullptr));
+        for (int i = 0; i < number; ++i) {
+            std::shuffle(cards.begin(), cards.end(), rng);
+        }
+    }
+
+    int cardCount() {
+        return cards.size();
+    }
+
+    void displayDeck() {
+        for (const auto& card : cards) {
+            card.displayCard();
+            std::cout << "------------------" << std::endl;
+        }
+    }
+};
+
+int main() {
+    Deck myDeck;
+
+    std::vector<std::string> suits = {"Hearts", "Diamonds", "Clubs", "Spades"};
+    std::vector<std::string> labels = {"Ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King"};
+
+    for (const auto& suit : suits) {
+        for (const auto& label : labels) {
+            int value = 0; 
+            int alternateValue = 0; 
+            int sortValue = 0; 
+            myDeck.addCard(Card(suit, label, value, alternateValue, sortValue));
+        }
+    }
+
+    std::cout << "Original Deck:" << std::endl;
+    myDeck.displayDeck();
+
+    Deck subdeck1 = myDeck.splitDeck();
+    Deck subdeck2 = myDeck;
+
+    std::cout << "Subdeck 1:" << std::endl;
+    subdeck1.displayDeck();
+
+    std::cout << "Subdeck 2:" << std::endl;
+    subdeck2.displayDeck();
+
+    return 0;
+}
+
