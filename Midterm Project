@@ -1,109 +1,97 @@
 #include <iostream>
 #include <vector>
-#include <algorithm> 
-#include <random>    
-#include <ctime>     
-
-using std::cout;
-using std::endl;
-using std::string;
-using std::vector;
+#include <algorithm>
+#include <random>
 
 class Card {
 private:
-    string suit;
-    string label;
+    std::string suit;
+    std::string label;
     int value;
     int alternateValue;
     int sortValue;
 
 public:
-    Card(string suit, string label, int value, int alternateValue, int sortValue) :
-        suit(suit), label(label), value(value), alternateValue(alternateValue), sortValue(sortValue) {}
+    Card(std::string suit, std::string label, int value, int alternateValue, int sortValue) :
+        suit(std::move(suit)), label(std::move(label)), value(value), alternateValue(alternateValue), sortValue(sortValue) {}
 
-    void displayCard() {
-        cout << "Suit: " << suit << endl;
-        cout << "Label: " << label << endl;
-        cout << "Value: " << value << endl;
-        cout << "Alternate Value: " << alternateValue << endl;
-        cout << "Sort Value: " << sortValue << endl;
+    void display() const {
+        std::cout << "Suit: " << suit << "\n"
+                  << "Label: " << label << "\n"
+                  << "Value: " << value << "\n"
+                  << "Alternate Value: " << alternateValue << "\n"
+                  << "Sort Value: " << sortValue << "\n";
     }
 };
 
 class Deck {
 private:
-    vector<Card> cards;
+    std::vector<Card> cards;
 
 public:
-    void addCard(Card new_card) {
-        cards.push_back(new_card);
+    void addCard(const Card& newCard) {
+        cards.push_back(newCard);
     }
 
     Card dealCard() {
-        Card dealt_card = cards.back();
+        Card dealtCard = std::move(cards.back());
         cards.pop_back();
-        return dealt_card;
+        return dealtCard;
     }
 
     Deck splitDeck() {
         Deck split;
-        int half_size = cards.size() / 2;
-        for (int i = 0; i < half_size; ++i) {
-            split.addCard(cards.back());
+        size_t halfSize = cards.size() / 2;
+        for (size_t i = 0; i < halfSize; ++i) {
+            split.addCard(std::move(cards.back()));
             cards.pop_back();
         }
         return split;
     }
 
-    void shuffleDeck(int number) {
-        std::default_random_engine rng(std::time(nullptr));
-        for (int i = 0; i < number; i++) {
+    void shuffle(int number) {
+        std::random_device rd;
+        std::mt19937 rng(rd());
+        for (int i = 0; i < number; ++i) {
             std::shuffle(cards.begin(), cards.end(), rng);
         }
     }
 
-    int cardCount() {
+    size_t cardCount() const {
         return cards.size();
     }
 
-    void displayDeck() {
+    void display() const {
         for (const auto& card : cards) {
-            card.displayCard();
-            cout << "------------------" << endl;
+            card.display();
+            std::cout << "------------------\n";
         }
     }
- 
 };
-
-
 
 int main() {
     Deck myDeck;
 
-    vector<string> suits = {"Hearts", "Diamonds", "Clubs", "Spades"};
-    vector<string> labels = {"Ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King"};
+    std::vector<std::string> suits = {"Hearts", "Diamonds", "Clubs", "Spades"};
+    std::vector<std::string> labels = {"Ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King"};
 
     for (const auto& suit : suits) {
         for (const auto& label : labels) {
-            int value = 0; 
-            int alternateValue = 0; 
-            int sortValue = 0; 
-            myDeck.addCard(Card(suit, label, value, alternateValue, sortValue));
+            myDeck.addCard(Card(suit, label, 0, 0, 0));
         }
     }
 
-    cout << "Original Deck:" << endl;
-    myDeck.displayDeck();
+    std::cout << "Original Deck:\n";
+    myDeck.display();
 
     Deck subdeck1 = myDeck.splitDeck();
     Deck subdeck2 = myDeck;
 
-    cout << "Subdeck 1:" << endl;
-    subdeck1.displayDeck();
+    std::cout << "Subdeck 1:\n";
+    subdeck1.display();
 
-    cout << "Subdeck 2:" << endl;
-    subdeck2.displayDeck();
+    std::cout << "Subdeck 2:\n";
+    subdeck2.display();
 
     return 0;
 }
-
