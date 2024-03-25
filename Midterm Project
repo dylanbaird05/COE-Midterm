@@ -2,137 +2,230 @@
 #include <vector>
 #include <algorithm> 
 #include <random>    
-#include <ctime>     
+#include <time.h>
 
 using std::cout;
 using std::endl;
 using std::string;
 using std::vector;
+using std::shuffle;
+using std::stoi;
 
-class Card {
-private:
-    string suit;
-    string label;
-    int value;
-    int alternateValue;
-    int sortValue;
+class Card 
+{
+    private:
+        string suit;
+        string label;
+        int value;
+        int alternateValue;
+        int sortValue;
 
-public:
-    Card(string suit, string label, int value, int alternateValue, int sortValue) :
-            suit(suit), label(label), value(value), alternateValue(alternateValue), sortValue(sortValue) {}
+    public:
+        Card(string suit, string label, int value, int alternateValue, int sortValue) :
+                suit(suit), label(label), value(value), alternateValue(alternateValue), sortValue(sortValue) {}
+       
+        // Getter functions
+        string getSuit() { return suit; }
+        string getLabel() { return label; }
+        int getValue()  { return value; }
+        int getAlternateValue() { return alternateValue; }
+        int getSortValue() { return sortValue; }
 
-    void displayCard() const {
-        cout << "Suit: " << suit << endl;
-        cout << "Label: " << label << endl;
-        cout << "Value: " << value << endl;
-        cout << "Alternate Value: " << alternateValue << endl;
-        cout << "Sort Value: " << sortValue << endl;
-    }
+        displays the cards
+        void displayCard() 
+        {
+            cout << "Suit: " << suit << endl;
+            cout << "Label: " << label << endl;
+            cout << "Value: " << value << endl;
+            cout << "Alternate Value: " << alternateValue << endl;
+            cout << "Sort Value: " << sortValue << endl;
+        }
 };
 
-class Deck {
-private:
-    vector<Card> cards;
+class Deck 
+{
+    private:
+        vector<Card> cards;
 
-public:
-    void addCard(Card new_card) {
-        cards.push_back(new_card);
-    }
+    public:
+        //adds a new card to a deck
+        void addCard(Card new_card) 
+        {
+            cards.push_back(new_card);
+        }
 
-    Card dealCard() {
-        Card dealt_card = cards.back();
-        cards.pop_back();
-        return dealt_card;
-    }
-
-    Deck splitDeck() {
-        Deck split;
-        int half_size = cards.size() / 2;
-        for (int i = 0; i < half_size; ++i) {
-            split.addCard(cards.back());
+        //function that removes a card from the deck and then returns the card that was removed
+        Card dealCard() 
+        {
+            Card dealt_card = cards.back();
             cards.pop_back();
+            return dealt_card;
         }
-        return split;
-    }
 
-    void shuffleDeck(int number) {
-        std::default_random_engine rng(std::time(nullptr));
-        for (int i = 0; i < number; i++) {
-            std::shuffle(cards.begin(), cards.end(), rng);
+        //function that splits the deck in half
+        Deck splitDeck() 
+        {
+            Deck split;
+            int half_size = cards.size() / 2;
+            for (int i = 0; i < half_size; ++i) 
+            {
+                split.addCard(cards.back());
+                cards.pop_back();
+            }
+            return split;
         }
-    }
 
-    int cardCount() {
-        return cards.size();
-    }
-
-    void displayDeck() const {
-        for (const auto &card : cards) {
-            card.displayCard();
-            cout << "------------------" << endl;
+        //returns the size of the card
+        int cardCount() 
+        {
+            return cards.size();
         }
-    }
 
-    void RiffleShuffle(Deck& subdeck1, Deck& subdeck2)
-    {
-    Deck shuffledDeck;
-    int totalCards = subdeck1.cardCount() + subdeck2.cardCount();
+        //displays deck through displaying each card in the deck
+        void displayDeck() 
+        {
+            for (auto &card : cards) 
+            {
+                card.displayCard();
+                cout << "------------------" << endl;
+            }
+        }
 
-    // Perform riffle shuffle
-    while (subdeck1.cardCount() > 0 && subdeck2.cardCount() > 0) {
-        shuffledDeck.addCard(subdeck1.dealCard());
-        shuffledDeck.addCard(subdeck2.dealCard());
-    }
+        void RiffleShuffle(Deck& subdeck1, Deck& subdeck2)
+        {
+            Deck shuffledDeck;
+            int totalCards = subdeck1.cardCount() + subdeck2.cardCount();
 
-    // If one subdeck still has cards remaining, add them to the shuffled deck
-    while (subdeck1.cardCount() > 0) {
-        shuffledDeck.addCard(subdeck1.dealCard());
-    }
+            // Perform riffle shuffle
+            while (subdeck1.cardCount() > 0 && subdeck2.cardCount() > 0) 
+            {
+                shuffledDeck.addCard(subdeck1.dealCard());
+                shuffledDeck.addCard(subdeck2.dealCard());
+            }
+            while (subdeck1.cardCount() > 0)  // If one subdeck still has cards remaining, add them to the shuffled deck
+            {
+                shuffledDeck.addCard(subdeck1.dealCard());
+            }
+            while (subdeck2.cardCount() > 0) 
+            {
+                shuffledDeck.addCard(subdeck2.dealCard());
+            }
 
-    while (subdeck2.cardCount() > 0) {
-        shuffledDeck.addCard(subdeck2.dealCard());
-    }
+            // Replace the original deck with the shuffled one
+            subdeck1 = shuffledDeck;
+        }
 
-    // Replace the original deck with the shuffled one
-    subdeck1 = shuffledDeck;
-    }
+        void RandomShuffle(Deck& subdeck1, Deck& subdeck2)
+        {
+            //random number generator
+            srand(time(nullptr));
+
+            Deck shuffledDeck;
+
+            // Perform random shuffle
+            while (subdeck1.cardCount() > 0 && subdeck2.cardCount() > 0) 
+            {
+                int cutPoint = rand() % 4 + 1; //Picks 1-4 cards to shuffle in 
+                for (int i = 0; i < cutPoint; ++i) 
+                {
+                    if (subdeck1.cardCount() > 0) 
+                    {
+                        shuffledDeck.addCard(subdeck1.dealCard());
+                    }
+                    if (subdeck2.cardCount() > 0) 
+                    {
+                        shuffledDeck.addCard(subdeck2.dealCard());
+                    }
+                }
+            }
+
+            // If one subdeck still has cards remaining, add them to the shuffled deck
+            while (subdeck1.cardCount() > 0) 
+            {
+                shuffledDeck.addCard(subdeck1.dealCard());
+            }
+            while (subdeck2.cardCount() > 0) 
+            {
+                shuffledDeck.addCard(subdeck2.dealCard());
+            }
+
+            // Replace the original deck with the shuffled one
+            subdeck1 = shuffledDeck;
+        }
+
+        //Used to correctly make the riffle shuffle while-loop logic statement of "!(x=y)" in int main() work 
+        bool operator==(Deck& other) 
+        {
+            if (cards.size() != other.cards.size())
+            return false;
+            for (size_t i = 0; i < cards.size(); ++i) 
+            {
+                if (cards[i].getSuit() != other.cards[i].getSuit() ||
+                    cards[i].getLabel() != other.cards[i].getLabel() ||
+                    cards[i].getValue() != other.cards[i].getValue() ||
+                    cards[i].getAlternateValue() != other.cards[i].getAlternateValue() ||
+                    cards[i].getSortValue() != other.cards[i].getSortValue())
+                {
+                    return false;
+                }
+            }    
+            return true;
+        }
 };
 
 // Function to assign values to card properties based on label
-void assignCardValues(const string &label, int &value, int &alternateValue, int &sortValue) {
-    if (label == "Ace") {
+void assignCardValues(string &label, int &value, int &alternateValue, int &sortValue) 
+{
+    if (label == "Ace") 
+    {
         value = 1;
         alternateValue = 11; // Assuming alternate value of 11 for Ace
-    } else if (label == "Jack" || label == "Queen" || label == "King") {
+    } 
+    else if (label == "Jack" || label == "Queen" || label == "King") 
+    {
         value = 10;
         alternateValue = 10;
-    } else {
-        value = std::stoi(label);
+    } 
+    else 
+    {
+        value = stoi(label);
         alternateValue = value;
     }
 
     // Assign sort value based on label
-    if (label == "Ace") {
+    if (label == "Ace") 
+    {
         sortValue = 1; // Sort Ace first
-    } else if (label == "Jack") {
+    } 
+    else if (label == "Jack") 
+    {
         sortValue = 11;
-    } else if (label == "Queen") {
+    } 
+    else if (label == "Queen") 
+    {
         sortValue = 12;
-    } else if (label == "King") {
+    } 
+    else if (label == "King")
+    {
         sortValue = 13;
-    } else {
+    }
+    else 
+    {
         sortValue = value;
     }
 }
 
-int main() {
+int main() 
+{
     Deck myDeck;
 
+    //Assigns the cards to the decks
     vector<string> suits = {"Hearts", "Diamonds", "Clubs", "Spades"};
     vector<string> labels = {"Ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King"};
-
-    for (const auto& suit : suits) {
-        for (const auto& label : labels) {
+    for (auto& suit : suits) 
+    {
+        for (auto& label : labels) 
+        {
             int value, alternateValue, sortValue;
             assignCardValues(label, value, alternateValue, sortValue);
             myDeck.addCard(Card(suit, label, value, alternateValue, sortValue));
@@ -141,22 +234,50 @@ int main() {
 
     cout << "Original Deck:" << endl;
     myDeck.displayDeck();
+    cout << endl;
 
+    //Copy of the original deck to use as comparisson
+    Deck originalDeck = myDeck;
+
+    //Perform the first riffle shuffle
     Deck subdeck1 = myDeck.splitDeck();
     Deck subdeck2 = myDeck;
+    myDeck.RiffleShuffle(subdeck1, subdeck2);
+    cout << "First Riffle Shuffled Deck:" << endl;
+    subdeck1.displayDeck();
+    myDeck = subdeck1;
 
-    //cout << "Subdeck 1:" << endl;
-    //subdeck1.displayDeck();
+    int numberShuffle = 1;
+    while (!(myDeck == originalDeck)) 
+    {
+        Deck subdeck1 = myDeck.splitDeck();
+        Deck subdeck2 = myDeck;
+        myDeck.RiffleShuffle(subdeck1, subdeck2);
+        numberShuffle++;
+        myDeck = subdeck1;
+        cout << "Perfect Riffle Shuffle #" << numberShuffle << ":" << endl;
+        subdeck1.displayDeck();
+    }
 
-    //cout << "Subdeck 2:" << endl;
-    //subdeck2.displayDeck();
+    cout << endl;
+    cout << "# of perfect riffle shuffles to return to the original deck: " << numberShuffle << endl;
 
-    // Perform riffle shuffle
-    //RiffleShuffle(subdeck1, subdeck2);
+    myDeck = originalDeck; //making sure that myDeck is set to its original value
 
-    // Display the shuffled deck
-    //cout << "Riffle Shuffled Deck:" << endl;
-    //subdeck1.displayDeck();
+   //Loop the random shuffle the same amount that it took the perfect riffle shuffle deck to sort itself out
+    int i = 0;
+    while (i < numberShuffle + 1) 
+    {
+        Deck subdeck1 = myDeck.splitDeck();
+        Deck subdeck2 = myDeck;
+        myDeck.RandomShuffle(subdeck1, subdeck2);
+        myDeck = subdeck1;
+        i++;
+    }
 
+    cout << endl;
+    cout << "Deck after " << numberShuffle << " random shuffles:" << endl;
+    subdeck1.displayDeck();
+    
     return 0;
 }
